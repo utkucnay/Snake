@@ -4,15 +4,9 @@ using UnityEngine;
 
 public class Tails : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+    [SerializeField] GameObject tailPrefab;
+    public void SpawnTail() {
+        var goTail = Instantiate(tailPrefab, transform);
+        goTail.transform.position = transform.GetChild(transform.childCount - 2).position;
     }
 }

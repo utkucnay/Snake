@@ -1,17 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
-public class Snake : MonoBehaviour, IFollow {
-    enum ObjectHierarchy : byte
-    {
+public class Snake : MonoBehaviour {
+    enum ObjectHierarchy : byte {
         GFX,
         Collider,
         Tails
     }
 
     Vector3 dir = Vector3.zero;
+    Vector3 prevPos = Vector3.left;
     Vector3 prevDir = Vector3.zero;
+
+    [Inject] GameManager gameManager;
 
     Rigidbody2D rb;
 
@@ -42,18 +45,23 @@ public class Snake : MonoBehaviour, IFollow {
     }
 
     private void InputHandle() {
-        if(Input.GetKey(KeyCode.W) && dir != Vector3.down)
+        if(Input.GetKey(KeyCode.W) && prevDir != Vector3.down)
             dir = Vector3.up;
-        if(Input.GetKey(KeyCode.S))
+        if(Input.GetKey(KeyCode.S) && prevDir != Vector3.up)
             dir = Vector3.down;
-        if(Input.GetKey(KeyCode.A))
+        if(Input.GetKey(KeyCode.A) && prevDir != Vector3.right)
             dir = Vector3.left;
-        if(Input.GetKey(KeyCode.D))
+        if(Input.GetKey(KeyCode.D) && prevDir != Vector3.left)
             dir = Vector3.right;
+        if(dir != Vector3.zero && prevDir == Vector3.zero) {
+            gameManager.StartGame();
+        }
+
     }
 
     private void Move() {
-        prevDir = transform.position;
+        prevDir = dir;
+        prevPos = transform.position;
         transform.position += dir;
     }
 
@@ -71,8 +79,15 @@ public class Snake : MonoBehaviour, IFollow {
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D other) {
+        if(other.CompareTag("Tail") || other.CompareTag("Boundary")) {
+            Debug.Log("EndGame");
+            gameManager.RequestEndGame();
+        }
+    }
+
     public Vector3 GetPrevPosition()
     {
-        return prevDir;
+        return prevPos;
     }
 }
